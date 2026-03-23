@@ -2,54 +2,45 @@
 <html lang="he">
 <head>
     <meta charset="UTF-8">
-    <title>Minecraft - Mouse Fix</title>
+    <title>Minecraft Fix - Interactive</title>
     <style>
-        body { margin: 0; overflow: hidden; font-family: sans-serif; }
-        canvas { display: block; }
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: sans-serif; }
         
-        /* מסך פתיחה הכרחי לנעילת עכבר */
+        /* מסך ההוראות - שיפרתי אותו שיהיה ברור וקליקבילי */
         #overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); color: white;
+            background: rgba(0,0,0,0.9); color: white;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 10; cursor: pointer;
+            z-index: 100; cursor: pointer; text-align: center;
         }
         
+        #overlay h1 { font-size: 3rem; color: #4CAF50; margin-bottom: 5px; }
+        #overlay p { font-size: 1.2rem; color: #ccc; }
+
         #crosshair {
             position: fixed; top: 50%; left: 50%; width: 20px; height: 20px;
             transform: translate(-50%, -50%); color: white; font-size: 24px;
-            pointer-events: none; z-index: 5;
+            pointer-events: none; z-index: 50; display: none;
         }
-
-        #hotbar {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 5px; background: rgba(0,0,0,0.5); padding: 5px;
-        }
-        .slot { width: 40px; height: 40px; border: 2px solid #777; color: white; display: flex; justify-content: center; align-items: center; }
-        .slot.active { border-color: white; background: rgba(255,255,255,0.2); }
     </style>
 </head>
 <body>
 
     <div id="overlay">
-        <h1 style="margin-bottom: 10px;">לחץ כאן כדי להתחיל</h1>
-        <p>תנועה: ' , ד , ג , ש | ראש: עכבר | שבירה/בניה: קליקים</p>
+        <h1>נא ללחוץ כאן</h1>
+        <p>כדי לשחרר את העכבר ולהתחיל לשחק</p>
+        <div style="margin-top: 20px; color: #888; font-size: 0.9rem;">
+            תנועה: ' , ד , ג , ש | קפיצה: Space | יציאה: ESC
+        </div>
     </div>
 
     <div id="crosshair">+</div>
 
-    <div id="hotbar">
-        <div class="slot active">1</div>
-        <div class="slot">2</div>
-        <div class="slot">3</div>
-        <div class="slot">4</div>
-    </div>
-
     <script type="importmap">
         {
             "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
             }
         }
     </script>
@@ -58,204 +49,60 @@
         import * as THREE from 'three';
         import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB);
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-
-        const light = new THREE.AmbientLight(0xffffff, 1.0);
-        scene.add(light);
-
-        // --- מנגנון נעילת עכבר ---
-        const controls = new PointerLockControls(camera, document.body);
-        const overlay = document.getElementById('overlay');
-
-        overlay.addEventListener('click', () => {
-            controls.lock();
-        });
-
-        controls.addEventListener('lock', () => {
-            overlay.style.display = 'none';
-        });
-
-        controls.addEventListener('unlock', () => {
-            overlay.style.display = 'flex';
-        });
-
-        // לוגיקת מקשים
-        let moveF = false, moveB = false, moveL = false, moveR = false;
-        document.addEventListener('keydown', (e) => {
-            if (e.key === "'") moveF = true;
-            if (e.key === "ד") moveB = true;
-            if (e.key === "ש") moveL = true;
-            if (e.key === "ג") moveR = true;
-        });
-        document.addEventListener('keyup', (e) => {
-            if (e.key === "'") moveF = false;
-            if (e.key === "ד") moveB = false;
-            if (e.key === "ש") moveL = false;
-            if (e.key === "ג") moveR = false;
-        });
-
-        // יצירת רצפה
-        const geo = new THREE.BoxGeometry(1, 1, 1);
-        const mat = new THREE.MeshLambertMaterial({ color: 0x4d9e3b });
-        const blocks = [];
-
-        for(let x=-10; x<10; x++) {
-            for(let z=-10; z<10; z++) {
-                const b = new THREE.Mesh(geo, mat);
-                b.position.set(x, 0, z);
-                scene.add(b);
-                blocks.push(b);
-            }
-        }
-
-        camera.position.y = 2;
-
-        function animate() {
-            requestAnimationFrame(animate);
-            if (controls.isLocked) {
-                if (moveF) controls.moveForward(0.1);
-                if (moveB) controls.moveForward(-0.1);
-                if (moveL) controls.moveRight(-0.1);
-                if (moveR) controls.moveRight(0.1);
-            }
-            renderer.render(scene, camera);
-        }
-        animate();
-    </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="he">
-<head>
-    <meta charset="UTF-8">
-    <title>Minecraft - Mouse Fix</title>
-    <style>
-        body { margin: 0; overflow: hidden; font-family: sans-serif; }
-        canvas { display: block; }
-        
-        /* מסך פתיחה הכרחי לנעילת עכבר */
-        #overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); color: white;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 10; cursor: pointer;
-        }
-        
-        #crosshair {
-            position: fixed; top: 50%; left: 50%; width: 20px; height: 20px;
-            transform: translate(-50%, -50%); color: white; font-size: 24px;
-            pointer-events: none; z-index: 5;
-        }
-
-        #hotbar {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 5px; background: rgba(0,0,0,0.5); padding: 5px;
-        }
-        .slot { width: 40px; height: 40px; border: 2px solid #777; color: white; display: flex; justify-content: center; align-items: center; }
-        .slot.active { border-color: white; background: rgba(255,255,255,0.2); }
-    </style>
-</head>
-<body>
-
-    <div id="overlay">
-        <h1 style="margin-bottom: 10px;">לחץ כאן כדי להתחיל</h1>
-        <p>תנועה: ' , ד , ג , ש | ראש: עכבר | שבירה/בניה: קליקים</p>
-    </div>
-
-    <div id="crosshair">+</div>
-
-    <div id="hotbar">
-        <div class="slot active">1</div>
-        <div class="slot">2</div>
-        <div class="slot">3</div>
-        <div class="slot">4</div>
-    </div>
-
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
-        }
-    </script>
-
-    <script type="module">
-        import * as THREE from 'three';
-        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+        // בדיקה אם הכל נטען
+        console.log("Game Engine Starting...");
 
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87CEEB);
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        const light = new THREE.AmbientLight(0xffffff, 1.0);
+        const light = new THREE.AmbientLight(0xffffff, 1.2);
         scene.add(light);
 
-        // --- מנגנון נעילת עכבר ---
+        // --- מנגנון הנעילה המשופר ---
         const controls = new PointerLockControls(camera, document.body);
         const overlay = document.getElementById('overlay');
+        const crosshair = document.getElementById('crosshair');
 
         overlay.addEventListener('click', () => {
+            console.log("Attempting to lock pointer...");
             controls.lock();
         });
 
         controls.addEventListener('lock', () => {
+            console.log("Pointer Locked!");
             overlay.style.display = 'none';
+            crosshair.style.display = 'block';
         });
 
         controls.addEventListener('unlock', () => {
+            console.log("Pointer Unlocked");
             overlay.style.display = 'flex';
+            crosshair.style.display = 'none';
         });
 
-        // לוגיקת מקשים
-        let moveF = false, moveB = false, moveL = false, moveR = false;
-        document.addEventListener('keydown', (e) => {
-            if (e.key === "'") moveF = true;
-            if (e.key === "ד") moveB = true;
-            if (e.key === "ש") moveL = true;
-            if (e.key === "ג") moveR = true;
-        });
-        document.addEventListener('keyup', (e) => {
-            if (e.key === "'") moveF = false;
-            if (e.key === "ד") moveB = false;
-            if (e.key === "ש") moveL = false;
-            if (e.key === "ג") moveR = false;
-        });
-
-        // יצירת רצפה
+        // יצירת עולם בסיסי מהיר
         const geo = new THREE.BoxGeometry(1, 1, 1);
         const mat = new THREE.MeshLambertMaterial({ color: 0x4d9e3b });
-        const blocks = [];
-
-        for(let x=-10; x<10; x++) {
-            for(let z=-10; z<10; z++) {
+        for(let x=-8; x<8; x++) {
+            for(let z=-8; z<8; z++) {
                 const b = new THREE.Mesh(geo, mat);
                 b.position.set(x, 0, z);
                 scene.add(b);
-                blocks.push(b);
             }
         }
 
-        camera.position.y = 2;
+        camera.position.set(0, 2, 5);
 
-        function animate() {
-            requestAnimationFrame(animate);
-            if (controls.isLocked) {
-                if (moveF) controls.moveForward(0.1);
-                if (moveB) controls.moveForward(-0.1);
-                if (moveL) controls.moveRight(-0.1);
-                if (moveR) controls.moveRight(0.1);
-            }
-            renderer.render(scene, camera);
-        }
-        animate();
-    </script>
-</body>
-</html>
+        // תנועה חלקה
+        let moveF = false, moveB = false, moveL = false, moveR = false;
+        const onKey = (e, val) => {
+            if (e.key === "'") moveF = val;
+            if (e.key === "ד") moveB = val;
+            if (e.key === "ש") moveL = val;
+            if (e.key === "ג") moveR = val;
+        };
+        document.addEventListener('keydown', (
